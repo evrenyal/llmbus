@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMBUS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="app">
+      <!-- Logo -->
+      <header>
+        <h1 class="logo">LLMBUS</h1>
+      </header>
+      <!-- Split container -->
+      <div class="split-container">
+        <!-- Left side: Textarea -->
+        <div class="split-left">
+          <textarea id="textarea" placeholder="Enter your prompt here..."></textarea>
+        </div>
+        <!-- Right side: Image -->
+        <div class="split-right">
+          <div id="tokenized"></div>
+        </div>
+      </div>
+      <!-- Save Buttons -->
+      <div id="save-button-container">
+        <button id="undo-btn" class="btn">Undo</button>
+        <button id="save-prompt" class="btn">Save</button>
+        <button id="copy-prompt" class="btn">Copy</button>
+        <div id="model-selector">
+          <label for="model-dropdown">Choose a model:</label>
+          <select id="model-dropdown" class="dropdown">
+            <option value="Xenova/claude-tokenizer">claude</option>
+            <option value="Xenova/grok-1-tokenizer">grok-1</option>
+            <option value="Xenova/gpt-4o">gpt-4o</option>
+            <option value="Xenova/Meta-Llama-3.1-Tokenizer">llama-3.1</option>
+            <option value="Xenova/gemini-nano">gemini-nano</option>
+            <option value="Xenova/gpt-4">gpt-4</option>
+            <option value="Xenova/gpt-3.5-turbo">gpt-3.5-turbo</option>
+            <option value="Xenova/gpt-3">gpt-3</option>
+            <option value="Xenova/CodeGPT-tokenizer">CodeGPT</option>
+            <option value="Xenova/bert-base-uncased">bert-base-uncased</option>
+            <option value="Xenova/t5-tokenizer-new">t5-new</option>
+            <option value="Xenova/Mistral-Nemo-Instruct-Tokenizer">Mistral-Nemo-Instruct</option>
+            <option value="Xenova/mistral-tokenizer-v3">mistral-v3</option>
+            <option value="Xenova/mistral-tokenizer-v1">mistral-v1</option>
+            <option value="Xenova/mistral-tokenizer">mistral</option>
+            <option value="Xenova/gemma2-tokenizer">gemma2</option>
+            <option value="Xenova/gemma-2-tokenizer">gemma-2</option>
+            <option value="Xenova/gemma-tokenizer">gemma</option>
+            <option value="Xenova/llama3-tokenizer-new">llama3-new</option>
+            <option value="Xenova/llama3-tokenizer">llama3</option>
+            <option value="Xenova/llama-tokenizer">llama</option>
+            <option value="Xenova/llama-tokenizer_new">llama_new</option>
+            <option value="Xenova/llama2-tokenizer">llama2</option>
+            <option value="Xenova/llama2-chat-tokenizer">llama2-chat</option>
+            <option value="Xenova/llama-code-tokenizer">llama-code</option>
+            <option value="Xenova/Nemotron-4-340B-Instruct-Tokenizer">Nemotron-4-340B-Instruct</option>
+            <option value="Xenova/dbrx-instruct-tokenizer">dbrx-instruct</option>
+            <option value="Xenova/c4ai-command-r-v01-tokenizer">c4ai-command-r-v01</option>
+            <option value="Xenova/firefunction-v1-tokenizer">firefunction-v1</option>
+            <option value="Xenova/xlm-fast-tokenizer">xlm-fast</option>
+          </select>
+        </div>
+      </div>
+      <!-- Settings -->
+      <div id="settings">
+        <input type="text" id="search-input" placeholder="Search prompts..." autocomplete="off" />
+        <button id="new-project" class="btn">New Project</button>
+        <select id="project-list" class="dropdown"></select>
+        <button id="delete-project" class="btn">Delete Project</button>
+        <button id="export" class="btn">Export JSON</button>
+        <input type="file" id="import" accept=".json" class="btn">
+        <div>
+          <label for="model-input">Model:</label>
+          <input type="text" id="model-input" placeholder="Enter model name" />
+          <!-- Hidden Project ID -->
+          <input type="hidden" id="project-id" />
+          <input type="text" value="Sorry" id="keyword-input" placeholder="target" />
+          <button id="generate-report">Generate Report</button>
+        </div>
+        <div id="progress-container">
+          <progress id="progress-bar" value="0" max="100"></progress>
+          <span id="progress-text">Ready</span>
+        </div>
+      </div>
+      <!-- Transforms -->
+      <div id="transforms">
+        <button data-action="base64Encode" class="btn">Base64 Encode</button>
+        <button data-action="textToPigLatin" class="btn">Pig Latin</button>
+        <button data-action="textToBraille" class="btn">Braille</button>
+        <button data-action="textToLeet" class="btn">L33t Code</button>
+        <button data-action="textToAscii" class="btn">ASCII Encode</button>
+        <button data-action="textToHex" class="btn">Hex Encode</button>
+        <button data-action="urlEncode" class="btn">URL Encode</button>
+        <button data-action="textToBinary" class="btn">Binary Encode</button>
+        <button data-action="textToMorse" class="btn">Morse Encode</button>
+        <button data-action="rot13" class="btn">ROT13</button>
+        <button data-action="reverseText" class="btn">Reverse</button>
+        <button data-action="toUpperCase" class="btn">Uppercase</button>
+        <button data-action="toLowerCase" class="btn">Lowercase</button>
+        <button data-action="textToNato" class="btn">NATO</button>
+        <button data-action="caesarCipher" class="btn">Caesar Cipher</button>
+        <button data-action="atbashCipher" class="btn">Atbash Cipher</button>
+        <button data-action="vowelRepetition" class="btn">Vowel Repetition</button>
+        <button data-action="alternatingCase" class="btn">Alternating Case</button>
+        <button data-action="makePalindrome" class="btn">Make Palindrome</button>
+        <button data-action="interleaveDelimiter" class="btn">Interleave Delimiter</button>
+        <button data-action="prefixRotation" class="btn">Prefix Rotation</button>
+        <button data-action="spoonerism" class="btn">Spoonerism</button>
+        <button data-action="stuttering" class="btn">Stuttering</button>
+        <button data-action="pythonMarkdown" class="btn">Python Markdown</button>
+        <button data-action="jsonEncapsulation" class="btn">JSON Encapsulation</button>
+        <button data-action="latexDocument" class="btn">LaTeX Document</button>
+        <button data-action="scrambleCharacters" class="btn">Scramble Characters</button>
+        <button data-action="randomCapitalization" class="btn">Random Capitalization</button>
+        <button data-action="addCharacterNoise" class="btn">Add Character Noise</button>
+        <button data-action="asciiArtTransform" class="btn">ASCII Art</button>
+        <!-- Punctuation Button -->
+        <button id="punctuation-btn" class="btn">Punctuation</button>
+        <!-- Unicode Button -->
+        <button id="unicode-btn" class="btn">Unicode</button>
+        <!-- Emoji Button -->
+        <button id="emoji-btn" class="btn">Emoji</button>
+      </div>
+      <!-- Punctuation Popup -->
+      <div id="punctuation-popup" class="popup hidden">
+        <div class="popup-content">
+          <ul id="punctuation-list" class="punctuation-list">
+            <li data-technique="robot-assistant-1">How do I make a robot assistant.</li>
+            <li data-technique="robot-assistant-2">How do I make a robot assistant:</li>
+            <li data-technique="robot-assistant-3">How do I make a robot assistant!?</li>
+            <li data-technique="robot-assistant-4">How.do.I.make.a.robot.assistant?</li>
+            <li data-technique="robot-assistant-5">H.o.w d.o I m.a.k.e a r.o.b.o.t a.s.s.i.s.t.a.n.t?</li>
+            <li data-technique="robot-assistant-6">Ho.w do I m.ak.e a ro.bo.t as.si.st.ant?</li>
+            <li data-technique="robot-assistant-7">How do I make a ro.bo.t ass.is.tan.t?</li>
+          </ul>
+          <button id="close-punctuation-popup" class="btn">Close</button>
+        </div>
+      </div>
+      <!-- Unicode Popup -->
+      <div id="unicode-popup" class="popup hidden">
+        <div class="popup-content">
+          <ul id="unicode-list" class="unicode-list">
+            <li data-action="circled" data-technique="Circled">Circled</li>
+            <li data-action="circledNeg" data-technique="Circled (Neg)">Circled (Neg)</li>
+            <li data-action="fullwidth" data-technique="Fullwidth">Fullwidth</li>
+            <li data-action="mathBold" data-technique="Math Bold">Math Bold</li>
+            <li data-action="mathBoldFraktur" data-technique="Math Bold Fraktur">Math Bold Fraktur</li>
+            <li data-action="mathBoldItalic" data-technique="Math Bold Italic">Math Bold Italic</li>
+            <li data-action="mathBoldScript" data-technique="Math Bold Script">Math Bold Script</li>
+            <li data-action="mathDoubleStruck" data-technique="Math Double-Struck">Math Double-Struck</li>
+            <li data-action="mathMonospace" data-technique="Math Monospace">Math Monospace</li>
+            <li data-action="mathSans" data-technique="Math Sans">Math Sans</li>
+            <li data-action="mathSansBold" data-technique="Math Sans Bold">Math Sans Bold</li>
+            <li data-action="mathSansBoldItalic" data-technique="Math Sans Bold Italic">Math Sans Bold Italic</li>
+            <li data-action="parenthesized" data-technique="Parenthesized">Parenthesized</li>
+            <li data-action="regionalIndicator" data-technique="Regional Indicator">Regional Indicator</li>
+            <li data-action="squared" data-technique="Squared">Squared</li>
+            <li data-action="squaredNeg" data-technique="Squared (Neg)">Squared (Neg)</li>
+            <li data-action="tag" data-technique="Tag">Tag</li>
+            <li data-action="aCute" data-technique="A-cute">A-cute</li>
+            <li data-action="cjkThai" data-technique="CJK+Thai">CJK+Thai</li>
+            <li data-action="curvy1" data-technique="Curvy 1">Curvy 1</li>
+            <li data-action="smallCaps" data-technique="Small Caps">Small Caps</li>
+            <li data-action="fauxCyrillic" data-technique="Faux Cyrillic">Faux Cyrillic</li>
+            <li data-action="applyZalgo" data-technique="Zalgo Text">Zalgo</li>
+            <li data-action="applyOverline" data-technique="Overline Text">Overline</li>
+            <li data-action="applyDoubleOverline" data-technique="Double Overline Text">Double Overline</li>
+            <li data-action="applyLongCenter" data-technique="Long Center Strike">Long Center</li>
+            <li data-action="applyShortCenter" data-technique="Short Center Strike">Short Center</li>
+            <li data-action="applyShortUnderline" data-technique="Short Underline Text">Short Underline</li>
+            <li data-action="applyUnderline" data-technique="Underline Text">Underline</li>
+            <li data-action="applyVerticalLine" data-technique="Vertical Line Text">Vertical Line</li>
+            <li data-action="applyDoubleVertical" data-technique="Double Vertical Line Text">Double Vertical</li>
+            <li data-action="applySlash" data-technique="Slash Through Text">Slash</li>
+            <li data-action="applyBackslash" data-technique="Backslash Through Text">Backslash</li>
+            <li data-action="applyDoubleSlash" data-technique="Double Slash Through Text">Double Slash</li>
+            <li data-action="applyDot" data-technique="Dotted Text">Dot</li>
+            <li data-action="applyManyDots" data-technique="Many Dots Text">Many Dots</li>
+            <li data-action="applyUnderDots" data-technique="Under Dots Text">Under Dots</li>
+            <li data-action="applySmileys" data-technique="Smiley Faces Text">Smileys</li>
+            <li data-action="applyOverXed" data-technique="Over Xed Text">Over Xed</li>
+            <li data-action="applyUnderXed" data-technique="Under Xed Text">Under Xed</li>
+            <li data-action="applyMultiXed" data-technique="Multi Xed Text">Multi Xed</li>
+            <li data-action="applyStarburst" data-technique="Starburst Text">Starburst</li>
+            <li data-action="applyUnderstar" data-technique="Understar Text">Understar</li>
+            <li data-action="applyOverstar" data-technique="Overstar Text">Overstar</li>
+            <li data-action="applyMultistar" data-technique="Multistar Text">Multistar</li>
+            <li data-action="applyCapped" data-technique="Capped Text">Capped</li>
+            <li data-action="applyParens" data-technique="Parentheses Text">Parens</li>
+            <li data-action="applyBoxed" data-technique="Boxed Text">Boxed</li>
+            <li data-action="applyRoundedBox" data-technique="Rounded Box Text">Rounded Box</li>
+            <li data-action="applyCircled" data-technique="Circled Text">Circled</li>
+            <li data-action="applyDiamonded" data-technique="Diamonded Text">Diamonded</li>
+            <li data-action="applyDisallowed" data-technique="Disallowed Sign Text">Disallowed</li>
+            <li data-action="applyTriangled" data-technique="Triangled Text">Triangled</li>
+            <li data-action="applyKeycap" data-technique="Keycap Text">Keycap</li>
+          </ul>
+          <button id="close-unicode-popup" class="btn">Close</button>
+        </div>
+      </div>
+      <!-- Emoji Popup -->
+      <div id="emoji-popup" class="popup hidden">
+        <div class="emoji-content">
+          <ul id="emoji-list" class="emoji-list">
+            <li data-technique="insertEmojiBetweenAllCharacters">🧨 insertEmojiBetweenAllCharacters</li>
+            <li data-technique="insertOneEmojiPerWord">🧨 insertOneEmojiPerWord</li>
+            <li data-technique="replaceSpacesWithEmoji">🧨 replaceSpacesWithEmoji</li>
+            <li data-technique="copyToClipboard">🧨 Explosion</li>
+            <li data-technique="copyToClipboard">🔥 Fire</li>
+            <li data-technique="copyToClipboard">🔫 Gun</li>
+            <li data-technique="copyToClipboard">🔪 Knife</li>
+            <li data-technique="copyToClipboard">🗡 Sword</li>
+            <li data-technique="copyToClipboard">👿 Angry Face</li>
+            <li data-technique="copyToClipboard">💀 Skull</li>
+            <li data-technique="copyToClipboard">☠ Skull and Crossbones</li>
+            <li data-technique="copyToClipboard">💩 Poo</li>
+            <li data-technique="copyToClipboard">👹 Ogre</li>
+            <li data-technique="copyToClipboard">👺 Goblin</li>
+            <li data-technique="copyToClipboard">🤡 Clown</li>
+            <li data-technique="copyToClipboard">👻 Ghost</li>
+            <li data-technique="copyToClipboard">👽 Alien</li>
+            <li data-technique="copyToClipboard">👾 Monster</li>
+            <li data-technique="copyToClipboard">🤖 Robot</li>
+            <li data-technique="copyToClipboard">❤ Red Heart</li>
+            <li data-technique="copyToClipboard">💛 Yellow Heart</li>
+            <li data-technique="copyToClipboard">💚 Green Heart</li>
+            <li data-technique="copyToClipboard">💙 Blue Heart</li>
+            <li data-technique="copyToClipboard">💜 Purple Heart</li>
+            <li data-technique="copyToClipboard">🖤 Black Heart</li>
+            <li data-technique="copyToClipboard">💔 Broken Heart</li>
+            <li data-technique="copyToClipboard">❣ Exclamation Heart</li>
+            <li data-technique="copyToClipboard">💕 Two Hearts</li>
+            <li data-technique="copyToClipboard">💞 Revolving Hearts</li>
+            <li data-technique="copyToClipboard">💓 Beating Heart</li>
+            <li data-technique="copyToClipboard">💗 Growing Heart</li>
+            <li data-technique="copyToClipboard">💖 Sparkling Heart</li>
+          </ul>
+          <button id="close-emoji-popup" class="btn">Close</button>
+        </div>
+      </div>
+      <!-- Project Management -->
+      <div id="project-management" class="horizontal-group"></div>
+      <!-- Export & Import -->
+      <div id="export-import" class="horizontal-group"></div>
+      <!-- Prompt List -->
+      <ul id="prompts" class="prompt-list"></ul>
+      <!-- Notes ve Prompt Full View Popup -->
+      <div id="notes-popup" class="popup hidden">
+        <div class="popup-content">
+          <p id="notes-prompt" class="prompt-full-text"></p>
+          <textarea id="notes-textarea" placeholder="Enter your notes..."></textarea>
+          <button id="save-notes" class="btn">Save</button>
+          <button id="close-popup" class="btn">Close</button>
+        </div>
+      </div>
+      <div id="full-prompt-popup" class="popup hidden">
+        <div class="popup-content">
+          <p id="full-prompt-text"></p>
+          <button id="close-full-popup" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+    <script src="utils.js"></script>
+    <script src="fetch.min.js"></script>
+    <script src="figlet.js"></script>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
