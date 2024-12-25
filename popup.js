@@ -567,7 +567,7 @@ async function processPromptList() {
         console.log(`Processing prompt ${i + 1}/${totalPrompts}:`, prompt);
 
         try {
-            progressText.innerText = `Processing ${i + 1} of ${totalPrompts}`;
+            progressText.innerText = `${i + 1} / ${totalPrompts}`;
             progressBar.value = i + 1;
 
 
