@@ -824,7 +824,6 @@ function replaceSpacesWithEmoji(sentence) {
   return sentence.split(" ").join(emojiForSentence());
 }
 
-
 function initializeCopyEmoji() {
   const items = document.querySelectorAll('li[data-technique="copyToClipboard"]');
   items.forEach(item => {
@@ -865,4 +864,34 @@ function asciiArtTransform(text) {
       }
     });
   });
+}
+
+// https://paulbutler.org/2025/smuggling-arbitrary-data-through-an-emoji/
+function tokenBomb(text) {
+    const VARIATION_SELECTOR_START = 0xFE00;
+    const VARIATION_SELECTOR_END = 0xFE0F;
+    const VARIATION_SELECTOR_SUPPLEMENT_START = 0xE0100;
+    const VARIATION_SELECTOR_SUPPLEMENT_END = 0xE01EF;
+    
+    function toVariationSelector(byte) {
+        if (byte >= 0 && byte < 16) {
+            return String.fromCodePoint(VARIATION_SELECTOR_START + byte);
+        } else if (byte >= 16 && byte < 256) {
+            return String.fromCodePoint(VARIATION_SELECTOR_SUPPLEMENT_START + (byte - 16));
+        }
+        return '';
+    }
+    
+    const bytes = new TextEncoder().encode(text);
+    let encoded = "😊";
+    for (const byte of bytes) {
+        const vs = toVariationSelector(byte);
+        if (vs) encoded += vs;
+    }
+
+    if (encoded.length !== text.length + 1) {
+        console.warn("Warning: Encoded message length does not match expected size.");
+    }
+
+    return encoded;
 }
