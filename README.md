@@ -1,4 +1,4 @@
-# LLMBUS v1.0 🚍
+# LLMBUS v1.1 🚍
 
 <p align="left">
   <img src="llmbus1.gif" alt="LLMBUS" width="50" height="50">
