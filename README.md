@@ -4,8 +4,10 @@
   <img src="llmbus1.gif" alt="LLMBUS" width="50" height="50">
 </p>
 
-Welcome to **LLMBUS!** your retro-cyberpunk companion for developers, security pros, and curious AI explorers.
-Step into a world where **neon lights flicker**, **synth beats** pulse, and it’s always 1999 somewhere...
+**Welcome to LLMBUS!**  
+Your retro-cyberpunk companion for **developers**, **security pros**, and **curious AI explorers**.
+
+Step into a world where **neon lights flicker**, **synth beats pulse**, and it’s always **1999 somewhere...**
 
 ---
 
