@@ -645,58 +645,154 @@ async function processPromptList() {
     generateReportTab(results);
 }
 
-document.getElementById('generate-report').addEventListener('click', processPromptList);
+      function audio() {
+        const text = document.getElementById('textarea').value.trim();
+        if (!text) return console.log("⚠️ No text entered, operation canceled.");
 
-function generateReportTab(results) {
-    console.log("Generating report...");
-    const reportHTML = `
-        <html>
-        <head>
-            <title>Prompt Classification Report</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f4f4f4; }
-                .benign { background-color: #d4edda; }
-                .malicious { background-color: #f8d7da; }
-                .error { background-color: #fff3cd; }
-                .details { white-space: pre-wrap; font-size: 0.9em; color: #333; }
-            </style>
-        </head>
-        <body>
-            <h1>Prompt Classification Report</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Prompt</th>
-                        <th>Classification</th>
-                        <th>Request</th>
-                        <th>Response</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${results
-                        .map(({ prompt, classification, request, response }) => `
-                            <tr class="${classification === 1 ? 'malicious' : classification === 0 ? 'benign' : 'error'}">
-                                <td>${prompt}</td>
-                                <td>${classification === 1 ? 1 : classification === 0 ? 0 : 'Error'}</td>
-                                <td class="details">${prompt}</td>
-                                <td class="details">${classification === 1 ? '' : response}</td>
-                            </tr>
-                        `)
-                        .join('')}
-                </tbody>
-            </table>
-        </body>
-        </html>
-    `;
+        const ttsUrl   = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(text)}`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(ttsUrl)}`;
 
-    const reportWindow = window.open('', '_blank');
-    reportWindow.document.write(reportHTML);
-    reportWindow.document.close();
-    console.log("Report generated and displayed.");
+        fetch(proxyUrl)
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.blob();
+          })
+          .then(blob => {
+            const audioUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = audioUrl;
+            a.download = "tts.mp3";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(audioUrl), 1000);
+            console.log("✅ Audio file is downloading: tts.mp3");
+          })
+          .catch(err => console.error("❌ TTS indirme hatası:", err));
+      }
+
+      document.getElementById('audio-btn').addEventListener('click', audio);
+
+/**
+ * Generates an image from the text input and automatically downloads it as a JPEG.
+ */
+function generateImage() {
+  const text = document.getElementById('textarea').value;
+  const bgColor = document.getElementById('bg-color-picker').value;
+  const textColor = document.getElementById('text-color-picker').value;
+
+  // Create an off-DOM canvas
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  const fontSize = 20;
+  ctx.font = `${fontSize}px Arial`;
+  const lines = text.split('\n');
+
+  // Calculate dimensions
+  let maxWidth = 0;
+  lines.forEach(line => {
+    const width = ctx.measureText(line).width;
+    if (width > maxWidth) maxWidth = width;
+  });
+  const lineHeight = fontSize * 1.2;
+  canvas.width = maxWidth + 20;
+  canvas.height = lineHeight * lines.length + 20;
+
+  // Draw background
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw text
+  ctx.fillStyle = textColor;
+  ctx.textBaseline = 'top';
+  lines.forEach((line, index) => {
+    ctx.fillText(line, 10, 10 + index * lineHeight);
+  });
+
+  // Trigger download via blob
+  canvas.toBlob(blob => {
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = 'rendered.jpg';
+    link.click();
+    URL.revokeObjectURL(url);
+  }, 'image/jpeg', 1.0);
 }
+
+
+document.getElementById('render-btn').addEventListener('click', generateImage);
+
+document.getElementById("paraphrase-btn").addEventListener("click", async () => {
+    // 1. Get the model name
+    const model = document.getElementById('model-input').value || 'phi4:latest'; // Default to 'phi4:latest'
+    console.log("Model name:", model);
+
+    const textarea = document.getElementById("textarea");
+    const text = textarea.value.trim();
+
+    // 2. If the textarea is empty, alert the user
+    if (!text) {
+        alert('Please enter text to paraphrase.');
+        console.log("No text entered. Paraphrasing not performed.");
+        return;
+    }
+
+    console.log("Text to paraphrase:", text);
+
+    // 3. Begin the OLLAMA API request
+    try {
+        console.log("Sending data to OLLAMA API...");
+
+        // Prepare the data for the API request
+        const requestData = {
+            model: model,
+            prompt: `Please paraphrase the following passage: "${text}"`,
+            stream: false // Setting stream to false as per the requirement
+        };
+
+        // Send the request to the API
+        const response = await fetch('http://localhost:11434/api/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)  // Ensure data is serialized correctly
+        });
+
+        // 4. Check if the response is OK
+        if (!response.ok) {
+            console.error(`Error: ${response.status} - ${response.statusText}`);
+            throw new Error(`API Error: ${response.statusText}`);
+        }
+
+        console.log("Successfully received a response from the API.");
+
+        // 5. Parse the API response as JSON
+        const data = await response.json();
+        console.log("API Response:", data);
+
+        // 6. Check if the response contains the expected 'response' field
+        if (!data.response) {
+            console.error("The response does not contain the 'response' field.");
+            alert("Paraphrasing failed. Please try again.");
+            return;
+        }
+
+        const paraphrasedText = data.response;
+        console.log("Paraphrased text:", paraphrasedText);
+
+        // 7. Update the textarea with the paraphrased text
+        textarea.value = paraphrasedText;
+        console.log("Paraphrased text added to the textarea.");
+
+    } catch (error) {
+        console.error("Paraphrasing error:", error);
+        alert("Paraphrase operation failed. Check the console for details.");
+    }
+});
+
 
 document.getElementById("close-popup").addEventListener("click", closeNotesPopup);
 document.getElementById("save-notes").addEventListener("click", saveNotes);
