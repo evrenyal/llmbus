@@ -9,7 +9,7 @@ Step into a world where **neon lights flicker**, **synth beats** pulse, and itâ€
 
 ---
 
-## ðŸŽ’ Key Features
+## Key Features
 
 | Category               | Capability                                  | Description                                                                 |
 |------------------------|---------------------------------------------|-----------------------------------------------------------------------------|
