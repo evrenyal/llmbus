@@ -1,6 +1,6 @@
 # LLMBUS v1.0 🚍
 
-<p align="right">
+<p align="left">
   <img src="llmbus1.gif" alt="LLMBUS" width="50" height="50">
 </p>
 
@@ -29,7 +29,7 @@ Step into a world where **neon lights flicker**, **synth beats** pulse, and it�
 
 ## 🖼️ Screenshot
 
-![LLMBUS user-interface]([https://github.com/user-attachments/assets/b9ad1547-88b3-492e-9d54-84d14dbf4a49](https://github.com/evrenyal/llmbus/blob/main/llmbus.jpg?raw=true))
+![LLMBUS Screenshot](https://github.com/evrenyal/llmbus/blob/main/llmbus.jpg?raw=true)
 
 ---
 
