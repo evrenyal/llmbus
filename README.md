@@ -25,7 +25,7 @@ Step into a world where **neon lights flicker**, **synth beats pulse**, and itâ€
 | **Search**             | In-App Search                               | Quickly find any prompt.                                           |
 | **Paraphrase**         | Text Rewriter                               | Rewrite text with new words, same meaning. Uses `phi-4:latest` by default. |
 
-> ðŸ’¡ *The default Ollama model is phi4:latest, but you can replace it with any model name you prefer.*
+> *The default Ollama model is phi4:latest, but you can replace it with any model name you prefer.*
 
 ---
 
