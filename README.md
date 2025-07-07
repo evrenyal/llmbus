@@ -20,7 +20,7 @@ Step into a world where **neon lights flicker**, **synth beats** pulse, and itâ€
 | **Tokenizer**          | Tokenizer Viewer                            | View token boundaries for popular LLMs.                                    |
 | **Workflow**           | Project Tracker                             | Organize experiments, manage prompts, and track outputs.                   |
 | **Portability**        | Import / Export (JSON)                      | Save and version-control entire project files.                             |
-| **Search**             | In-App Search                               | Quickly find any prompt or note.                                           |
+| **Search**             | In-App Search                               | Quickly find any prompt.                                           |
 | **Paraphrase**         | Text Rewriter                               | Rewrite text with new words, same meaning. Uses `phi-4:latest` by default. |
 
 > ðŸ’¡ *The default Ollama model is phi4:latest, but you can replace it with any model name you prefer.*
