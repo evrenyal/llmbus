@@ -842,3 +842,15 @@ button:hover {
     color: red;
     border-bottom: 1px solid #eee;
 }
+
+#controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;         
+}
+
+#visual-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;        
+}
