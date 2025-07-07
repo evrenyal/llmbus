@@ -4,8 +4,8 @@
   <img src="llmbus1.gif" alt="LLMBUS" width="50" height="50">
 </p>
 
-**Welcome aboard the LLMBUS** — a retro-cyberpunk toolkit built for developers, security professionals, and AI researchers.  
-Step into a world where **neon lights flicker** and **synth rhythms** echo from 1999…
+Welcome to **LLMBUS** — your retro-cyberpunk companion for developers, security pros, and curious AI explorers.
+Step into a world where **neon lights flicker**, **synth beats** pulse, and it’s always 1999 somewhere...
 
 ---
 
