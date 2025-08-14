@@ -31,8 +31,9 @@ Step into a world where **neon lights flicker**, **synth beats pulse**, and it�
 
 ## 🖼️ Screenshot
 
-![LLMBUS Screenshot](https://github.com/evrenyal/llmbus/blob/main/llmbus.jpg?raw=true)
+![LLMBUS Screenshot](https://github.com/evrenyal/llmbus/blob/main/llmbus1.png?raw=true)
 
+![LLMBUS Screenshot](https://github.com/evrenyal/llmbus/blob/main/llmbus2.png?raw=true)
 ---
 
 ## 🛠️ Installation
