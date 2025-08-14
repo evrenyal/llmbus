@@ -94,6 +94,33 @@
           </div>          
         </div>
 
+        <!-- Settings -->
+        <button id="settings-btn" class="btn">Nano-GPT Settings</button>
+        <!-- Run All -->
+        <button id="run-all-btn" class="btn">Run All (Ollama)</button>
+
+        <!-- Runner Popup -->
+        <div id="runner-popup" class="popup hidden">
+          <div class="popup-content" style="max-width:900px;width:90%;max-height:80vh;overflow:auto;">
+            <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;">
+              <h3 style="margin:0;">Bus Driver</h3>
+              <button id="close-runner-popup" class="btn">Close</button>
+            </div>
+
+            <div style="margin:12px 0;display:flex;align-items:center;gap:8px;">
+              <progress id="progress-bar" value="0"></progress>
+              <span id="progress-text">0 / 0</span>
+            </div>
+
+            <div id="run-items" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+            <div style="margin-top:12px;display:flex;gap:8px;">
+              <button id="export-html-btn" class="btn">Export HTML</button>
+              <button id="open-html-btn" class="btn">Open in New Tab</button>
+            </div>
+          </div>
+        </div>
+
 
       </div>
       <!-- Transforms -->
@@ -135,19 +162,47 @@
         <!-- Emoji Button -->
         <button id="emoji-btn" class="btn">Emoji</button>
         <!-- Token Bomb Button -->
-        <button data-action="tokenBomb" class="btn">Token Bomb</button>        
+        <button data-action="tokenBomb" class="btn">Token Bomb</button>
+        <!-- Invisible / Control Characters -->
+        <button data-action="insertZeroWidthChars" class="btn">Zero-Width Chars</button>
+        <button data-action="insertControlCharacters" class="btn">Control Chars (RTL, SHY)</button>
+        
+        <button data-action="wrapInRegexStyle" class="btn">Regex Style</button>
+        <button data-action="reorderSentence" class="btn">Reorder Sentence</button>
+        <button data-action="phoneticSpell" class="btn">Phonetic Spelling</button>
+        <!-- cloakText Button -->
+        <button id="cloakText-btn" class="btn">cloakText</button>
+             
       </div>
+      <!-- Cloaking Popup -->
+      <div id="cloakText-popup" class="popup hidden">
+        <div class="popup-content"> 
+          <ul id="cloakText-list" class="cloakText-list">
+            <li data-rule-index="0">NLC: Analogy</li>
+            <li data-rule-index="1">NLC: Narrative</li>
+            <li data-rule-index="2">NLC: Question</li>
+            <li data-rule-index="3">NLC: Metaphor</li>
+          </ul>
+          <button id="close-cloakText-popup" class="btn">Close</button>
+        </div>
+      </div>    
       <!-- Punctuation Popup -->
       <div id="punctuation-popup" class="popup hidden">
         <div class="popup-content">
           <ul id="punctuation-list" class="punctuation-list">
-            <li data-technique="robot-assistant-1">How do I make a robot assistant.</li>
-            <li data-technique="robot-assistant-2">How do I make a robot assistant:</li>
-            <li data-technique="robot-assistant-3">How do I make a robot assistant!?</li>
-            <li data-technique="robot-assistant-4">How.do.I.make.a.robot.assistant?</li>
-            <li data-technique="robot-assistant-5">H.o.w d.o I m.a.k.e a r.o.b.o.t a.s.s.i.s.t.a.n.t?</li>
-            <li data-technique="robot-assistant-6">Ho.w do I m.ak.e a ro.bo.t as.si.st.ant?</li>
-            <li data-technique="robot-assistant-7">How do I make a ro.bo.t ass.is.tan.t?</li>
+            <li data-rule-index="0">How do I make a robot assistant.</li>
+            <li data-rule-index="1">How do I make a robot assistant:</li>
+            <li data-rule-index="2">How do I make a robot assistant!?</li>
+            <li data-rule-index="3">How.do.I.make.a.robot.assistant</li>
+            <li data-rule-index="4">H.o.w. .d.o. .I. .m.a.k.e. .a. .r.o.b.o.t. .a.s.s.i.s.t.a.n.t</li>
+            <li data-rule-index="5">How do. I make. a robot. assistant</li>
+            <li data-rule-index="6">How. do. I. make. a. robot. assistant</li>
+            <li data-rule-index="7">(How do I make a robot assistant)</li>
+            <li data-rule-index="8">!How do I make a robot assistant!</li>
+            <li data-rule-index="9">How do I make a robot assistant$</li>
+            <li data-rule-index="10">(!How do I make a robot assistant$)</li>
+            <li data-rule-index="11">?How do I make a robot assistant.</li>
+            <li data-rule-index="12">~How do I make a robot assistant~</li>
           </ul>
           <button id="close-punctuation-popup" class="btn">Close</button>
         </div>

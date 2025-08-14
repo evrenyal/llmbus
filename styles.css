@@ -159,15 +159,22 @@ button:hover {
 
 
 #settings {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
-  gap: 10px; 
-  padding: 8px; 
-  background-color: #16213e; 
-  margin-bottom: 5px;
+  display: flex;
+  flex-wrap: wrap;      
+  align-items: center;
+  gap: 8px;              
+  overflow-x: auto;     
+  padding: 4px;
+  box-sizing: border-box;
 }
 
-
+#settings .btn,
+#settings select,
+#settings input[type="text"],
+#settings input[type="file"],
+#settings input[type="color"] {
+  flex-shrink: 0;        
+}
 
 #project-management {
   display: flex;
@@ -854,3 +861,57 @@ button:hover {
   align-items: center;
   gap: 0.5rem;        
 }
+ 
+
+#cloakText-popup{
+  position: fixed;
+  inset: 0;                         
+  display: flex;
+  justify-content: flex-end;        
+  align-items: flex-start;          
+  padding: 72px 32px 0 0;           
+  background: transparent !important; 
+  box-shadow: none !important;
+  pointer-events: none;            
+  z-index: 10000;
+}
+
+
+#cloakText-popup .popup-content{
+  pointer-events: auto;
+  width: clamp(320px, 30vw, 480px); 
+  height: auto;
+  max-height: calc(100vh - 96px);
+  background: #1a1a2e;
+  color: #fff;
+  padding: 16px 18px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+
+#cloakText-popup .cloakText-list{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 10px 0;
+  padding: 0;
+  list-style: none;
+}
+#cloakText-popup .cloakText-list li{
+  width: 100%;
+  padding: 10px 12px;
+  background: #3b3e47;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: break-word;
+}
+#cloakText-popup .cloakText-list li:hover{
+  background: #e94560; color: #fff;
+}
+
+#close-cloakText-popup{ display:block; width:100%; }

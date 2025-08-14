@@ -15,6 +15,13 @@ window.textToPigLatin = textToPigLatin;
 window.disemvowel = disemvowel;
 window.asciiArtTransform = asciiArtTransform;
 
+window.insertZeroWidthChars = insertZeroWidthChars;
+window.insertControlCharacters = insertControlCharacters;
+window.wrapInRegexStyle = wrapInRegexStyle;
+window.reorderSentence = reorderSentence;
+window.phoneticSpell = phoneticSpell;
+window.cloakText = cloakText;
+
 // Base64 Encoding
 function base64Encode(text) {
   try {
@@ -249,48 +256,51 @@ function disemvowel(text) {
 }
 
 
-/* Output:
- [
-   "Hello world",
-   "Hello world.",
-   "Hello world:",
-   "Hello world!?",
-   "Hello.world",
-   "H.e.l.l.o. w.o.r.l.d",
-   "Hello. world.",
-   "Hello. world"
- ]
+/* Output (for "How do I make a robot assistant"):
+[
+  "How do I make a robot assistant.",           // with period
+  "How do I make a robot assistant:",           // with colon
+  "How do I make a robot assistant!?",          // with !?
+  "How.do.I.make.a.robot.assistant",            // spaces → dots
+  "H.o.w. .d.o. .I. .m.a.k.e. .a. .r.o.b.o.t. .a.s.s.i.s.t.a.n.t?", // dots after every second char (approximated)
+  "How do. I make. a robot. assistant?",        // dots after every second word
+  "(How do I make a robot assistant)",          // parentheses
+  "!How do I make a robot assistant!",          // exclamation-wrapped
+  "How do I make a robot assistant$",           // dollar-suffixed
+  "(!How do I make a robot assistant$)",        // combination
+  "?How do I make a robot assistant.",          // question-style + period
+  "~How do I make a robot assistant~"           // tilde-wrapped
+]
 */
-function applyPunctuationRules(text, ruleIndex) {
+function applyPunctuationRules(text = "", ruleIndex) {
+  if (typeof text !== "string") text = "";
+
   const punctuationRules = [
-    `${text}.`, // Ends with a period
-    `${text}:`, // Ends with a colon
-    `${text}!?`, // Ends with an exclamation and question mark
-    text.split(" ").join("."), // Replace spaces with periods
-    text
-    .split("")
-    .map((char, idx) => (idx % 2 === 0 ? char : `${char}.`))
-    .join(""), // Add dots after every second character
-    text
-    .split(" ")
-    .map((word, idx) => (idx % 2 === 0 ? word : `${word}.`))
-    .join(" "), // Add dots after every second word
-    text.replace(/ /g, ". ").trim(), // Add dots between words with spaces preserved
+    `${text}.`,
+    `${text}:`,
+    `${text}!?`,
+    text.split(" ").join("."),
+    text.split("").map((char, idx) => (idx % 2 === 0 ? char : `${char}.`)).join(""),
+    text.split(" ").map((word, idx) => (idx % 2 === 0 ? word : `${word}.`)).join(" "),
+    text.replace(/ /g, ". ").trim(),
+    `(${text})`,
+    `!${text}!`,
+    `${text}$`,
+    `(!${text}$)`,
+    `?${text}.`,
+    `~${text}~`,
   ];
 
-  // If a specific ruleIndex is provided
   if (typeof ruleIndex === "number") {
     if (ruleIndex < 0 || ruleIndex >= punctuationRules.length) {
-      throw new Error(
-        `Invalid ruleIndex: Must be between 0 and ${punctuationRules.length - 1}`
-      );
+      throw new Error(`Invalid ruleIndex: Must be between 0 and ${punctuationRules.length - 1}`);
     }
     return punctuationRules[ruleIndex];
   }
 
-  // If no ruleIndex is provided, apply all rules
   return punctuationRules;
 }
+
 
 //Unicode
 
@@ -895,3 +905,90 @@ function tokenBomb(text) {
 
     return encoded;
 }
+
+/***********************
+* Invisible / Control Characters
+***********************/
+
+
+function insertZeroWidthChars(text) {
+  const zwj = "\u200D";
+  const zwnj = "\u200C";
+  return text.split("").map((c, i) => i % 2 === 0 ? c + zwj : c + zwnj).join("");
+}
+
+function insertControlCharacters(text) {
+  const rtl = "\u202E";
+  const ltr = "\u200E";
+  const shy = "\u00AD";
+  return `${ltr}${text}${shy}${rtl}`;
+}
+
+/***********************
+* Regex Style Obfuscation
+***********************/
+
+function wrapInRegexStyle(text) {
+  return `/^${text.replace(/\s+/g, ".*")}$/gi`;
+}
+
+
+/***********************
+* Sentence Reordering
+***********************/
+
+function reorderSentence(text) {
+  const words = text.split(" ");
+  if (words.length < 3) return text;
+  const middle = words.slice(1, -1).reverse();
+  return [words[0], ...middle, words[words.length - 1]].join(" ");
+}
+
+
+/***********************
+* Phonetic Spelling
+***********************/
+
+function phoneticSpell(text) {
+  const map = {
+    a: "ay", b: "bee", c: "see", d: "dee", e: "ee", f: "eff", g: "gee", h: "aitch",
+    i: "eye", j: "jay", k: "kay", l: "el", m: "em", n: "en", o: "oh", p: "pee",
+    q: "cue", r: "ar", s: "ess", t: "tee", u: "you", v: "vee", w: "double-you",
+    x: "ex", y: "why", z: "zee"
+  };
+  return [...text].map(char => map[char.toLowerCase()] || char).join(" ");
+}
+
+
+/***********************
+* Natural Language Cloaking
+***********************/
+
+function cloakText(text, style = "analogy") {
+  const templates = {
+    analogy: [
+      `Suggesting "${text}" is like nudging someone to do what they were already thinking.`,
+      `Imagine a situation where "${text}" is the unspoken rule everyone follows.`,
+      `Asking for "${text}" is like hinting without using direct words.`
+    ],
+    narrative: [
+      `Once, a developer found a way to "${text}" just by interpreting things creatively.`,
+      `There was a time when "${text}" happened naturally, no instructions needed.`,
+      `In a quiet corner of the system, someone figured out how to "${text}" with no guidance.`
+    ],
+    question: [
+      `What happens if one simply decides to "${text}" when no one's watching?`,
+      `Could it be possible that "${text}" occurs without needing to ask directly?`,
+      `Is there a path where "${text}" becomes a natural choice, not a command?`
+    ],
+    metaphor: [
+      `"${text}" is like a shadow — always there, even if no one points at it.`,
+      `Doing "${text}" is like speaking with your eyes instead of your mouth.`,
+      `Sometimes "${text}" is the silence between two words.`
+    ]
+  };
+
+  const options = templates[style] || templates["analogy"];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
