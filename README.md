@@ -1,4 +1,4 @@
-# LLMBUS v1.1 🚍
+# LLMBUS v1.2 🚍
 
 <p align="left">
   <img src="llmbus1.gif" alt="LLMBUS" width="50" height="50">
@@ -24,7 +24,7 @@ Step into a world where **neon lights flicker**, **synth beats pulse**, and it�
 | **Portability**        | Import / Export (JSON)                      | Save and version-control entire project files.                             |
 | **Search**             | In-App Search                               | Quickly find any prompt.                                           |
 | **Paraphrase**         | Text Rewriter                               | Rewrite text with new words, same meaning. Uses `phi-4:latest` by default. |
-
+| **Fuzzing**            | Bus Driver (Neo-GPT / Ollama Fuzzer)        | Sends crafted prompts to LLMs using Neo-GPT or Ollama for fuzzing and robustness testing. |
 > *The default Ollama model is phi4:latest, but you can replace it with any model name you prefer.*
 
 ---
@@ -53,7 +53,8 @@ sudo docker run -d --gpus all \
 
 Big thanks to these amazing resources that inspired parts of **LLMBUS**:
 
-- [OWASP AI Testing Guide](https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/README.md)  
+- [OWASP AI Testing Guide](https://github.com/OWASP/www-project-ai-testing-guide/blob/main/Document/README.md)
+- [OWASP AI Testing Guide](https://huggingface.co/datasets/joey-melo/owasp-aitg-app-payloads)
   *An evolving reference on testing AI systems for security and robustness.*
 
 - [Garak (NVIDIA)](https://github.com/NVIDIA/garak)  
