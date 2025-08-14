@@ -1924,6 +1924,29 @@ function processPromptListRunner() {
     }
     window._runLock = RUN_ID;
 
+    // ---- helper: fetch with retries (exp backoff + jitter) ----
+    async function fetchWithRetry(url, options, { retries = 2, baseDelay = 600, timeoutMs = 30000 } = {}) {
+        let attempt = 0;
+        while (true) {
+            attempt++;
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(new Error('Request timeout')), timeoutMs);
+            try {
+                const res = await fetch(url, { ...options, signal: ctrl.signal });
+                clearTimeout(t);
+                if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+                return res;
+            } catch (err) {
+                clearTimeout(t);
+                if (attempt > (retries + 1)) throw err;
+                const jitter = Math.floor(Math.random() * 200);
+                const delay = baseDelay * Math.pow(2, attempt - 1) + jitter;
+                console.warn(`fetch retry ${attempt - 1}/${retries} after error: ${err?.message || err}. wait ${delay}ms`);
+                await new Promise(r => setTimeout(r, delay));
+            }
+        }
+    }
+
     try {
         // ===== MODEL =====
         const model =
@@ -2030,14 +2053,14 @@ ${quoted}
             const evalPrompt = buildEvalPrompt(rawPrompt);
             const answerEl = makeRunItem(rawPrompt);
 
-            // --- Tek attempt çalıştırıcı: finalize ETMEZ, {classification, response} döner
+            // --- Tek attempt çalıştırıcı: {classification, response} döner
             function runOnce() {
                 let resultText = '';
                 let classification = 0; // 0=Pass, 1=Fail
 
                 function runWithNano() {
                     console.log(`[${RUN_ID}] prompt#${i} NanoGPT -> start`);
-                    return fetch('https://nano-gpt.com/api/v1/chat/completions', {
+                    return fetchWithRetry('https://nano-gpt.com/api/v1/chat/completions', {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${window.NANO_API_KEY}`,
@@ -2047,11 +2070,8 @@ ${quoted}
                             model: window.NANO_MODEL || 'chatgpt-4o-latest',
                             messages: [{ role: 'user', content: evalPrompt }]
                         })
-                    })
-                    .then(res => {
-                        if (!res.ok) throw new Error(`NanoGPT API Error: ${res.status} ${res.statusText}`);
-                        return res.json();
-                    })
+                    }, { retries: 2, baseDelay: 600, timeoutMs: 30000 })
+                    .then(res => res.json())
                     .then(nanoData => {
                         resultText = nanoData?.choices?.[0]?.message?.content?.trim() || '';
                         answerEl.textContent = resultText;
@@ -2063,13 +2083,12 @@ ${quoted}
 
                 function runWithOllama() {
                     console.log(`[${RUN_ID}] prompt#${i} Ollama -> start (model=${model})`);
-                    return fetch('http://localhost:11434/api/generate', {
+                    return fetchWithRetry('http://localhost:11434/api/generate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ model, prompt: evalPrompt })
-                    })
+                    }, { retries: 2, baseDelay: 600, timeoutMs: 30000 })
                     .then(res => {
-                        if (!res.ok) throw new Error(`Ollama API Error: ${res.status} ${res.statusText}`);
                         if (!res.body || !res.body.getReader) {
                             console.warn(`[${RUN_ID}] prompt#${i} response not streamable; using text() fallback`);
                             return res.text().then(t => ({ text: t, reader: null }));
@@ -2083,7 +2102,7 @@ ${quoted}
                                 try {
                                     const j = JSON.parse(line);
                                     if (j.response) resultText += j.response;
-                                } catch {/* ignore */}
+                                } catch { /* ignore */ }
                             });
                             answerEl.textContent = resultText;
                             if (/fail/i.test(resultText)) classification = 1;
@@ -2121,7 +2140,7 @@ ${quoted}
                                                     }
                                                 }
                                             }
-                                        } catch {/* ignore non-JSON */}
+                                        } catch { /* ignore non-JSON */ }
                                     });
                                     if (!matched) readChunk();
                                 }).catch(reject);
@@ -2159,9 +2178,10 @@ ${quoted}
                             failFound = true; // herhangi bir deneme Fail -> prompt Fail
                         }
                     } catch (err) {
-                        // Ağ/servis hatası da Fail olarak işlenir
+                        // runOnce içinde her uç nokta 3 kez denenir; yine de hata kalırsa bu denemeyi hatalı sayalım
                         console.error(`[${RUN_ID}] prompt#${i} attempt ${attempts} error:`, err);
                         lastResp = String((err && err.message) || err);
+                        // Ağ/servis hatasında da vakayı Fail kabul etmek istiyorsan:
                         failFound = true;
                     }
                 }
@@ -2191,7 +2211,6 @@ ${quoted}
         }, 0);
     }
 }
-
 
 
 // When selecting a project, reload the prompts list for that project
