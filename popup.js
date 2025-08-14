@@ -1911,7 +1911,6 @@ function buildExtendedReportHtml(results) {
 }
 
 
-
 function processPromptListRunner() {
     // ===== DEBUG & RUN LOCK =====
     const RUN_ID = `run#${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`;
@@ -1955,11 +1954,7 @@ function processPromptListRunner() {
         progressText.innerText = `0 / ${totalPrompts}`;
 
         // per-prompt finalize guard
-        const promptState = Array.from({
-            length: totalPrompts
-        }, () => ({
-            done: false
-        }));
+        const promptState = Array.from({ length: totalPrompts }, () => ({ done: false }));
 
         function updateProgress(i) {
             progressBar.value = i + 1;
@@ -1993,23 +1988,13 @@ ${quoted}
 ---`;
         }
 
-        function finalizePrompt(i, {
-            prompt,
-            classification,
-            request,
-            response
-        }) {
+        function finalizePrompt(i, { prompt, classification, request, response }) {
             if (promptState[i].done) {
                 console.warn(`[${RUN_ID}] prompt#${i} finalize called twice — ignored`);
                 return;
             }
             promptState[i].done = true;
-            results.push({
-                prompt,
-                classification,
-                request,
-                response
-            });
+            results.push({ prompt, classification, request, response });
             updateProgress(i);
             console.timeEnd?.(`[${RUN_ID}] prompt#${i} total`);
             console.groupEnd?.(); // end prompt group
@@ -2044,13 +2029,15 @@ ${quoted}
 
             const evalPrompt = buildEvalPrompt(rawPrompt);
             const answerEl = makeRunItem(rawPrompt);
-            let resultText = '';
-            let classification = 0; // 0=Pass, 1=Fail
 
-            // --- API runners ---
-            function tryNano() {
-                console.log(`[${RUN_ID}] prompt#${i} NanoGPT -> start`);
-                return fetch('https://nano-gpt.com/api/v1/chat/completions', {
+            // --- Tek attempt çalıştırıcı: finalize ETMEZ, {classification, response} döner
+            function runOnce() {
+                let resultText = '';
+                let classification = 0; // 0=Pass, 1=Fail
+
+                function runWithNano() {
+                    console.log(`[${RUN_ID}] prompt#${i} NanoGPT -> start`);
+                    return fetch('https://nano-gpt.com/api/v1/chat/completions', {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${window.NANO_API_KEY}`,
@@ -2058,10 +2045,7 @@ ${quoted}
                         },
                         body: JSON.stringify({
                             model: window.NANO_MODEL || 'chatgpt-4o-latest',
-                            messages: [{
-                                role: 'user',
-                                content: evalPrompt
-                            }]
+                            messages: [{ role: 'user', content: evalPrompt }]
                         })
                     })
                     .then(res => {
@@ -2073,141 +2057,122 @@ ${quoted}
                         answerEl.textContent = resultText;
                         if (/fail/i.test(resultText)) classification = 1;
                         console.log(`[${RUN_ID}] prompt#${i} NanoGPT done (classification=${classification})`);
-                        finalizePrompt(i, {
-                            prompt: rawPrompt,
-                            classification,
-                            request: rawPrompt,
-                            response: resultText
-                        });
+                        return { classification, response: resultText };
                     });
-            }
+                }
 
-            function tryOllama() {
-                console.log(`[${RUN_ID}] prompt#${i} Ollama -> start (model=${model})`);
-                return fetch('http://localhost:11434/api/generate', {
+                function runWithOllama() {
+                    console.log(`[${RUN_ID}] prompt#${i} Ollama -> start (model=${model})`);
+                    return fetch('http://localhost:11434/api/generate', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            model,
-                            prompt: evalPrompt
-                        })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model, prompt: evalPrompt })
                     })
                     .then(res => {
                         if (!res.ok) throw new Error(`Ollama API Error: ${res.status} ${res.statusText}`);
                         if (!res.body || !res.body.getReader) {
                             console.warn(`[${RUN_ID}] prompt#${i} response not streamable; using text() fallback`);
-                            return res.text().then(t => ({
-                                text: t,
-                                reader: null
-                            }));
+                            return res.text().then(t => ({ text: t, reader: null }));
                         }
-                        return {
-                            reader: res.body.getReader(),
-                            text: null
-                        };
+                        return { reader: res.body.getReader(), text: null };
                     })
-                    .then(({
-                        reader,
-                        text
-                    }) => {
+                    .then(({ reader, text }) => {
                         if (text != null) {
-                            // non-stream fallback: try to parse JSON lines
+                            // non-stream fallback: try parse line-by-line JSON
                             text.split(/\r?\n/).forEach(line => {
                                 try {
                                     const j = JSON.parse(line);
                                     if (j.response) resultText += j.response;
-                                } catch {
-                                    /* ignore */ }
+                                } catch {/* ignore */}
                             });
                             answerEl.textContent = resultText;
                             if (/fail/i.test(resultText)) classification = 1;
                             console.log(`[${RUN_ID}] prompt#${i} Ollama no-stream done (classification=${classification})`);
-                            finalizePrompt(i, {
-                                prompt: rawPrompt,
-                                classification,
-                                request: rawPrompt,
-                                response: resultText
-                            });
-                            return;
+                            return { classification, response: resultText };
                         }
 
                         const decoder = new TextDecoder();
                         let matched = false;
                         let chunks = 0;
 
-                        function readChunk() {
-                            reader.read().then(({
-                                done,
-                                value
-                            }) => {
-                                if (done) {
-                                    if (/fail/i.test(resultText) || matched) classification = 1;
-                                    console.log(`[${RUN_ID}] prompt#${i} Ollama stream done; chunks=${chunks}, classification=${classification}`);
-                                    finalizePrompt(i, {
-                                        prompt: rawPrompt,
-                                        classification,
-                                        request: rawPrompt,
-                                        response: resultText
-                                    });
-                                    return;
-                                }
-
-                                chunks++;
-                                const chunk = decoder.decode(value, {
-                                    stream: true
-                                }).trim();
-                                chunk.split(/\r?\n/).forEach(line => {
-                                    if (!line) return;
-                                    try {
-                                        const json = JSON.parse(line);
-                                        if (json.response) {
-                                            resultText += json.response;
-                                            answerEl.textContent = resultText;
-                                            if (targetKeyword) {
-                                                const re = new RegExp(`\\b${targetKeyword}\\b`, 'i');
-                                                if (re.test(json.response)) {
-                                                    matched = true;
-                                                    console.log(`[${RUN_ID}] prompt#${i} keyword matched -> cancel stream`);
-                                                    reader.cancel();
+                        return new Promise((resolve, reject) => {
+                            function readChunk() {
+                                reader.read().then(({ done, value }) => {
+                                    if (done) {
+                                        if (/fail/i.test(resultText) || matched) classification = 1;
+                                        console.log(`[${RUN_ID}] prompt#${i} Ollama stream done; chunks=${chunks}, classification=${classification}`);
+                                        return resolve({ classification, response: resultText });
+                                    }
+                                    chunks++;
+                                    const chunk = decoder.decode(value, { stream: true }).trim();
+                                    chunk.split(/\r?\n/).forEach(line => {
+                                        if (!line) return;
+                                        try {
+                                            const json = JSON.parse(line);
+                                            if (json.response) {
+                                                resultText += json.response;
+                                                answerEl.textContent = resultText;
+                                                if (targetKeyword) {
+                                                    const re = new RegExp(`\\b${targetKeyword}\\b`, 'i');
+                                                    if (re.test(json.response)) {
+                                                        matched = true;
+                                                        console.log(`[${RUN_ID}] prompt#${i} keyword matched -> cancel stream`);
+                                                        reader.cancel();
+                                                    }
                                                 }
                                             }
-                                        }
-                                    } catch {
-                                        /* ignore non-JSON */ }
-                                });
-
-                                if (!matched) readChunk();
-                            });
-                        }
-                        readChunk();
-                    })
-                    .catch(err => {
-                        console.error(`[${RUN_ID}] prompt#${i} Ollama error:`, err);
-                        finalizePrompt(i, {
-                            prompt: rawPrompt,
-                            classification: 'Error',
-                            request: JSON.stringify({
-                                model,
-                                prompt: rawPrompt
-                            }),
-                            response: String(err && err.message || err)
+                                        } catch {/* ignore non-JSON */}
+                                    });
+                                    if (!matched) readChunk();
+                                }).catch(reject);
+                            }
+                            readChunk();
                         });
                     });
+                }
+
+                // Ayar varsa Nano -> yoksa direkt Ollama; Nano hata verirse Ollama'ya düş
+                if (window.NANO_API_KEY && (window.NANO_MODEL || true)) {
+                    return runWithNano().catch(err => {
+                        console.warn(`[${RUN_ID}] prompt#${i} Nano failed -> fallback to Ollama:`, err);
+                        return runWithOllama();
+                    });
+                } else {
+                    console.log(`[${RUN_ID}] prompt#${i} skipping NanoGPT (no API key/model) -> Ollama`);
+                    return runWithOllama();
+                }
             }
 
-            // === NEW DECISION: skip NanoGPT entirely if settings are empty ===
-            if (window.NANO_API_KEY && (window.NANO_MODEL || true)) {
-                // We have API key (and optionally custom model). Try Nano; on fail, fallback to Ollama.
-                tryNano().catch(err => {
-                    console.warn(`[${RUN_ID}] prompt#${i} Nano failed -> fallback to Ollama:`, err);
-                    return tryOllama();
+            // === 3 deneme: herhangi bir deneme Fail olursa erken Fail ===
+            (async () => {
+                let attempts = 0;
+                let failFound = false;
+                let lastResp = '';
+
+                while (attempts < 3 && !failFound) {
+                    attempts++;
+                    console.log(`[${RUN_ID}] prompt#${i} attempt ${attempts}/3`);
+                    try {
+                        const { classification, response } = await runOnce();
+                        lastResp = response;
+                        if (classification === 1 || /(^|\b)fail(\b|$)/i.test(response)) {
+                            failFound = true; // herhangi bir deneme Fail -> prompt Fail
+                        }
+                    } catch (err) {
+                        // Ağ/servis hatası da Fail olarak işlenir
+                        console.error(`[${RUN_ID}] prompt#${i} attempt ${attempts} error:`, err);
+                        lastResp = String((err && err.message) || err);
+                        failFound = true;
+                    }
+                }
+
+                finalizePrompt(i, {
+                    prompt: rawPrompt,
+                    classification: failFound ? 1 : 0,
+                    request: rawPrompt,
+                    response: lastResp
                 });
-            } else {
-                console.log(`[${RUN_ID}] prompt#${i} skipping NanoGPT (no API key/model) -> Ollama`);
-                tryOllama();
-            }
+            })();
         }
 
         // start
@@ -2226,6 +2191,7 @@ ${quoted}
         }, 0);
     }
 }
+
 
 
 // When selecting a project, reload the prompts list for that project
