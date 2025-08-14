@@ -24,8 +24,7 @@ Step into a world where **neon lights flicker**, **synth beats pulse**, and itâ€
 | **Portability**        | Import / Export (JSON)                      | Save and version-control entire project files.                             |
 | **Search**             | In-App Search                               | Quickly find any prompt.                                           |
 | **Paraphrase**         | Text Rewriter                               | Rewrite text with new words, same meaning. Uses `phi-4:latest` by default. |
-| **Fuzzing**            | Bus Driver (Neo-GPT / Ollama Fuzzer)        | Sends crafted prompts to LLMs using Neo-GPT or Ollama for fuzzing and robustness testing. |
-> *The default Ollama model is phi4:latest, but you can replace it with any model name you prefer.*
+| **Fuzzing**            | Bus Driver (Neo-GPT / Ollama Fuzzer)        | Sends crafted prompts to LLMs using [Nano-GPT](https://nano-gpt.com) or [Ollama](https://ollama.com) for fuzzing and robustness testing, with up to **three attempts per prompt**. If the model fails to block a malicious prompt even once, the entire prompt is marked as failed. The default Ollama model is `phi4:latest`, but you can replace it with any model name you prefer. If [Nano-GPT](https://nano-gpt.com) settings are not configured, [Ollama](https://ollama.com) will be used instead. At the end of the process, it automatically generates a detailed report of the results.|
 
 ---
 
